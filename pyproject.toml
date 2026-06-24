@@ -27,6 +27,9 @@ assembly = [
     "mj_manipulator",
 ]
 
+[tool.uv.sources]
+mj_manipulator = { workspace = true }
+
 
 [tool.setuptools.packages.find]
 where = ["src"]
