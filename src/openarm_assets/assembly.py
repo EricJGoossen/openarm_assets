@@ -23,7 +23,7 @@ def add_ee_site(spec: mujoco.MjSpec, site_name: str = _EE_SITE_NAME) -> None:
     """Add an end-effector site to the OpenArm left hand TCP."""
     tcp = spec.body(_TCP_BODY_NAME)
     if tcp is None:
-        raise RuntimeError("No body named {_TCP_BODY_NAME!r} in this spec")
+        raise RuntimeError(f"No body named {_TCP_BODY_NAME!r} in this spec")
     site = tcp.add_site()
     site.name = site_name
     site.pos = [0.0, 0.0, 0.0]
