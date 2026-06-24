@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "openarm_assets"
+version = "0.1.0"
+description = "MuJoCo models for the OpenArm robot"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    {name = "Eric Goossen", email = "ericjgoossen@gmail.com"},
+]
+maintainers = [
+    {name = "Eric Goossen", email = "ericjgoossen@gmail.com"},
+]
+dependencies = [
+    "mujoco",
+    "numpy-stl>=3.2.0",
+]
+
+
+[project.optional-dependencies]
+assembly = [
+    "mj_manipulator",
+]
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
+[tool.setuptools.package-data]
+openarm_assets = [
+    "models/**/*.xml",
+    "models/**/*.stl",
+    "models/**/*.obj",
+    "models/**/*.png",
+    "models/**/*.mtl",
+    "models/**/README.md",
+]
+
+
+[tool.ruff]
+line-length = 120
+
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I"]
+
+
+[tool.ruff.lint.per-file-ignores]
+"src/openarm_assets/__init__.py" = ["F401"]
+
+
+[dependency-groups]
+dev = [
+    "pillow>=12.1.0",
+    "pytest",
+    "ruff",
+]

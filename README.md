@@ -1,0 +1,1 @@
+Models vendored from enactic/openarm_mujoco@5c6e1b4, v1.
