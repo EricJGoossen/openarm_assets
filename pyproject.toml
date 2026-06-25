@@ -46,6 +46,12 @@ openarm_assets = [
 ]
 
 
+[project.urls]
+Homepage = "https://github.com/ericjgoossen/openarm"
+Repository = "https://github.com/ericjgoossen/openarm"
+Issues = "https://github.com/ericjgoossen/openarm/issues"
+
+
 [tool.ruff]
 line-length = 120
 

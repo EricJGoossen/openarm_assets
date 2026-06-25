@@ -7,8 +7,8 @@ import mujoco
 from openarm_assets import MODELS_DIR
 
 # Default source scene and the decorated output this module produces.
-_DEFAULT_SRC = MODELS_DIR / "openarm" / "scene.xml"
-_DEFAULT_OUT = MODELS_DIR / "openarm" / "openarm_assembled.xml"
+_DEFAULT_SRC = MODELS_DIR / "openarm" / "vendor" / "scene.xml"
+_DEFAULT_OUT = MODELS_DIR / "openarm" / "openarm.xml"
 
 _EE_SITE_NAME = "openarm_left_ee_site"
 _TCP_BODY_NAME = "openarm_left_hand_tcp"
