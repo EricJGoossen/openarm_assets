@@ -71,7 +71,7 @@ def build_openarm(
     """Load the OpenArm scene and apply all decorations"""
 
     spec = mujoco.MjSpec.from_file(str(src))
-    spec.compiler.meshdir = str(_MODEL_DIR / "meshes")
+    spec.compiler.meshdir = "../meshes"
 
     for side_name in sides:
         side = _SIDES[side_name]

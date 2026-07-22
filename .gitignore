@@ -8,3 +8,5 @@ dist/
 
 # venv workspace
 .venv/
+
+COLCON_IGNORE
