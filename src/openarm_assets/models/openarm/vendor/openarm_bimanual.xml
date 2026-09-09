@@ -592,4 +592,17 @@ limitations under the License.
     <frameangvel name="world_site_angvel" objtype="site" objname="world_site" />
     <velocimeter name="world_site_vel" site="world_site" />
   </sensor>
+
+  <!-- "ready" -- canonical home pose used by Openarm.reset(). All joints at
+  0 except joint4 on each arm: joint4's range is [0, 2.443461] (see
+  hw_validation/joint_limits.yaml), so 0 sits exactly on its lower limit --
+  a genuinely zero pose is infeasible/singular for planning. 0.3 rad keeps
+  joint4 with comfortable margin from that limit. Verified collision-free
+  (mj_forward, ncon=0) and within all joint ranges for the decorated
+  bimanual model before being added here. -->
+  <keyframe>
+    <key name="ready"
+      qpos="0 0 0 0.3 0 0 0 0 0
+            0 0 0 0.3 0 0 0 0 0" />
+  </keyframe>
 </mujoco>
