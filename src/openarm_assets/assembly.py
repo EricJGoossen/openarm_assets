@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 import mujoco
+import numpy as np
 
 from openarm_assets import MODELS_DIR
 
@@ -28,6 +29,7 @@ _SIDES = {
         "base_body": "openarm_left_link0",
         "left_finger_body": "openarm_left_left_finger",
         "right_finger_body": "openarm_left_right_finger",
+        "joint4": "openarm_left_joint4",
     },
     "right": {
         "ee_site_name": "openarm_right_ee_site",
@@ -35,6 +37,7 @@ _SIDES = {
         "base_body": "openarm_right_link0",
         "left_finger_body": "openarm_right_left_finger",
         "right_finger_body": "openarm_right_right_finger",
+        "joint4": "openarm_right_joint4",
     }
 }
 
@@ -62,6 +65,24 @@ def add_finger_exclude(spec: mujoco.MjSpec, left_finger: str, right_finger: str)
     exclude.bodyname1 = left_finger
     exclude.bodyname2 = right_finger
 
+def add_ready_keyframe(spec: mujoco.MjSpec, joint4_names: list[str], joint4_pos: float = 0.3) -> None:
+    """Add the "ready" home pose: all joints at 0 except `joint4` on each
+    arm. joint4's range is [0, 2.44346] (see hw_validation/joint_limits.yaml),
+    so 0 sits exactly on its lower limit -- a singular pose for planning to
+    start from. `joint4_pos` keeps it clear of that limit instead.
+    """
+    model = spec.compile()
+    qpos = np.zeros(model.nq)
+    for name in joint4_names:
+        jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        if jid < 0:
+            raise RuntimeError(f"No joint named {name!r} in this spec")
+        qpos[model.jnt_qposadr[jid]] = joint4_pos
+
+    key = spec.add_key()
+    key.name = "ready"
+    key.qpos = qpos
+
 """ Build """
 
 def build_openarm(
@@ -78,6 +99,12 @@ def build_openarm(
         add_ee_site(spec, side["tcp_body"], side["ee_site_name"])
         add_gravcomp(spec, side["base_body"])
         add_finger_exclude(spec, side["left_finger_body"], side["right_finger_body"])
+
+    # Both arms' joints are always present in the loaded scene regardless of
+    # which side(s) get decorated above, so the keyframe covers joint4 on
+    # both -- not just `sides` -- to keep every output out of that singular
+    # pose.
+    add_ready_keyframe(spec, [s["joint4"] for s in _SIDES.values()])
 
     return spec
 
