@@ -12,6 +12,16 @@ from openarm_assets import MODELS_DIR
 
 Side = Literal["left", "right"]
 
+# joint4's real resting position sits right at its raw lower limit (0) -- see
+# add_ready_keyframe's docstring below. The onboard P+D controller's
+# steady-state settling error (no integral term) puts the live joint a hair
+# negative often enough that planning's start-configuration validity check
+# was rejecting the arm's own current pose during hardware soak testing.
+# This comfortably covers the observed drift (~-0.001 to -0.0013 rad) with
+# room to spare -- it's not meant to allow deliberately commanding the joint
+# negative, just to accept an already-settled pose that's a hair past zero.
+JOINT4_LOWER_LIMIT_MARGIN_RAD = -0.05
+
 # Default source model and the decorated output this module produces.
 _MODEL_DIR = MODELS_DIR / "openarm"
 _DEFAULT_SRC = _MODEL_DIR / "vendor" / "openarm_bimanual.xml"
@@ -83,6 +93,16 @@ def add_ready_keyframe(spec: mujoco.MjSpec, joint4_names: list[str], joint4_pos:
     key.name = "ready"
     key.qpos = qpos
 
+def widen_joint4_lower_limit(spec: mujoco.MjSpec, joint4_name: str) -> None:
+    """Widen `joint4_name`'s lower range bound by JOINT4_LOWER_LIMIT_MARGIN_RAD.
+
+    See that constant's comment and add_ready_keyframe's docstring above for
+    why joint4's raw lower limit sitting exactly at its resting position is
+    fragile against real controller settling noise.
+    """
+    joint = spec.joint(joint4_name)
+    joint.range[0] = JOINT4_LOWER_LIMIT_MARGIN_RAD
+
 """ Build """
 
 def build_openarm(
@@ -101,9 +121,11 @@ def build_openarm(
         add_finger_exclude(spec, side["left_finger_body"], side["right_finger_body"])
 
     # Both arms' joints are always present in the loaded scene regardless of
-    # which side(s) get decorated above, so the keyframe covers joint4 on
-    # both -- not just `sides` -- to keep every output out of that singular
-    # pose.
+    # which side(s) get decorated above, so the limit margin and keyframe
+    # cover joint4 on both -- not just `sides` -- to keep every output out
+    # of that singular pose.
+    for s in _SIDES.values():
+        widen_joint4_lower_limit(spec, s["joint4"])
     add_ready_keyframe(spec, [s["joint4"] for s in _SIDES.values()])
 
     return spec
